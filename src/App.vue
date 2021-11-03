@@ -1,8 +1,12 @@
 <template>
   <div id="app">
     <div class="office">
-      <Map />
-      <SideMenu />
+      <Map :tables="tables" :legend="legend" @clickHandler="onClickHandler" />
+      <SideMenu
+        :person="person"
+        :isUserOpenned="isUserOpenned"
+        @closeProfile="onCloseProfile"
+      />
     </div>
   </div>
 </template>
@@ -10,12 +14,55 @@
 <script>
 import Map from "./components/Map.vue";
 import SideMenu from "./components/SideMenu.vue";
+import tables from "@/assets/data/tables.json";
+import legend from "@/assets/data/legend.json";
+import people from "@/assets/data/people.json";
 
 export default {
   name: "App",
   components: {
     Map,
     SideMenu,
+  },
+
+  data: () => ({
+    tables: [],
+    legend: [],
+    people: [],
+    person: {},
+    isUserOpenned: false,
+  }),
+
+  created() {
+    this.tables = tables;
+    this.people = people;
+    this.legend = this.getCounter(this.tables, legend);
+  },
+
+  methods: {
+    getCounter(tables, legend) {
+      let res = [];
+
+      legend.map((legendItem) => {
+        tables.forEach((table) => {
+          if (table.group_id === legendItem.group_id) {
+            legendItem.counter += 1;
+          }
+        });
+        res.push(legendItem);
+      });
+
+      return res;
+    },
+
+    onClickHandler(id) {
+      this.person = this.people.find((person) => person.tableId === id);
+      this.isUserOpenned = true;
+    },
+
+    onCloseProfile() {
+      this.isUserOpenned = false;
+    },
   },
 };
 </script>

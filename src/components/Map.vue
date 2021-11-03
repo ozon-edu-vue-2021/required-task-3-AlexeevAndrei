@@ -1,21 +1,17 @@
 <template>
   <div class="map">
     <h3>Карта офиса</h3>
-
-    <div v-if="!isLoading" class="map-root">
-      <MapSVG ref="svg" @click="clickHandler" />
+    <div v-if="isLoading">Loading...</div>
+    <div v-else class="map-root">
+      <MapSVG ref="svg" />
       <TableSVG v-show="false" ref="table" />
     </div>
-    <div v-else>Loading...</div>
   </div>
 </template>
 
 <script>
 import MapSVG from "@/assets/images/map.svg";
 import * as d3 from "d3";
-import tables from "@/assets/data/tables.json";
-import legend from "@/assets/data/legend.json";
-
 import TableSVG from "@/assets/images/workPlace.svg";
 
 export default {
@@ -24,13 +20,23 @@ export default {
     TableSVG,
   },
 
+  props: {
+    tables: {
+      type: Array,
+      required: true,
+    },
+
+    legend: {
+      type: Array,
+      required: true,
+    },
+  },
+
   data() {
     return {
       isLoading: false,
       svg: null,
       g: null,
-      tables: [],
-      legend: [],
       tableSVG: null,
     };
   },
@@ -40,8 +46,6 @@ export default {
     this.g = this.svg.select("g");
     this.tableSVG = d3.select(this.$refs.table);
 
-    this.tables = tables;
-    this.legend = this.getCounter(this.tables, legend);
     if (this.g) {
       this.drawTables();
     } else {
@@ -50,21 +54,6 @@ export default {
   },
 
   methods: {
-    getCounter(tables, legend) {
-      let res = [];
-
-      legend.map((legendItem) => {
-        tables.forEach((table) => {
-          if (table.group_id === legendItem.group_id) {
-            legendItem.counter += 1;
-          }
-        });
-        res.push(legendItem);
-      });
-
-      return res;
-    },
-
     drawTables() {
       const svgTablesGroup = this.g.append("g").classed("groupPlaces", true);
 
@@ -82,18 +71,11 @@ export default {
           .html(this.tableSVG.html())
           .attr(
             "fill",
-            legend.find((it) => it.group_id === table.group_id)?.color ??
+            this.legend.find((it) => it.group_id === table.group_id)?.color ??
               "transparent"
-          );
+          )
+          .on("click", () => this.$emit("clickHandler", table._id));
       });
-    },
-
-    clickHandler(event) {
-      let parent = event.target.closest(".employer-place");
-      if (parent) {
-        let id = parent.dataset.id;
-        console.log(id);
-      } else return;
     },
   },
 };
