@@ -64,8 +64,10 @@ export default {
     },
 
     onClickHandler(id) {
-      this.person = this.people.find((person) => person.tableId === id);
-      this.isUserOpenned = true;
+      setTimeout(() => {
+        this.person = this.people.find((person) => person.tableId === id);
+        this.isUserOpenned = true;
+      }, 0);
     },
 
     onCloseProfile() {

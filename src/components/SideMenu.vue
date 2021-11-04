@@ -42,7 +42,7 @@
           <span v-else class="legend--empty"> Список пуст </span>
         </div>
         <div class="legend__chart">
-          <Pie ref="chart" />
+          <Chart :data="copyLegend" />
         </div>
       </div>
     </div>
@@ -53,7 +53,7 @@
 import LegendItem from "./SideMenu/LegendItem.vue";
 import PersonCard from "./SideMenu/PersonCard.vue";
 import draggable from "vuedraggable";
-import { Pie } from "vue-chartjs";
+import Chart from "./SideMenu/Chart.vue";
 
 export default {
   props: {
@@ -71,61 +71,24 @@ export default {
     },
   },
 
-  computed: {
-    copyLegend() {
-      return [...this.legend];
-    },
-  },
-
   components: {
     LegendItem,
     PersonCard,
     draggable,
-    Pie,
+    Chart,
   },
 
   data: () => ({
-    chartData: null,
-    options: null,
+    copyLegend: [],
   }),
 
-  mounted() {
-    this.makeChart();
+  created() {
+    this.copyLegend = [...this.legend];
   },
-
-  // watch: {
-  //   isUserOpenned(data) {
-  //     if (!data) {
-  //       this.makeChart();
-  //     }
-  //   },
-  // },
 
   methods: {
     closeProfile() {
       this.$emit("closeProfile");
-    },
-
-    makeChart() {
-      this.chartData = {
-        labels: this.copyLegend.map((legendItem) => legendItem.text),
-        datasets: [
-          {
-            label: "Легенда",
-            backgroundColor: this.copyLegend.map(
-              (legendItem) => legendItem.color
-            ),
-            data: this.copyLegend.map((legendItem) => legendItem.counter),
-          },
-        ],
-      };
-      this.options = {
-        legend: {
-          display: false,
-        },
-      };
-
-      this.$refs.chart.renderChart(this.chartData, this.options);
     },
   },
 };
