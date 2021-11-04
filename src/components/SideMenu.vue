@@ -18,19 +18,19 @@
       <div v-if="isUserOpenned" class="profile">
         <div v-if="!person" class="profile__empty">Место пустое</div>
 
-        <PersonCard :person="person" />
+        <PersonCard v-else :person="person" />
       </div>
       <div v-else class="legend">
         <div class="legend__data">
-          <div v-if="legend.length > 0" class="legend__items">
+          <div v-if="copyLegend.length > 0" class="legend__items">
             <draggable
-              v-model="legend"
+              v-model="copyLegend"
               group="people"
               @start="drag = true"
               @end="drag = false"
             >
               <LegendItem
-                v-for="(item, index) in legend"
+                v-for="(item, index) in copyLegend"
                 :key="index"
                 :color="item.color"
                 :text="item.text"
@@ -52,7 +52,6 @@
 <script>
 import LegendItem from "./SideMenu/LegendItem.vue";
 import PersonCard from "./SideMenu/PersonCard.vue";
-import legend from "@/assets/data/legend.json";
 import draggable from "vuedraggable";
 import { Pie } from "vue-chartjs";
 
@@ -66,6 +65,16 @@ export default {
       type: Object,
       default: null,
     },
+    legend: {
+      type: Array,
+      require: true,
+    },
+  },
+
+  computed: {
+    copyLegend() {
+      return [...this.legend];
+    },
   },
 
   components: {
@@ -76,43 +85,47 @@ export default {
   },
 
   data: () => ({
-    legend: [],
+    chartData: null,
+    options: null,
   }),
-
-  created() {
-    this.loadLegend();
-  },
 
   mounted() {
     this.makeChart();
   },
 
+  // watch: {
+  //   isUserOpenned(data) {
+  //     if (!data) {
+  //       this.makeChart();
+  //     }
+  //   },
+  // },
+
   methods: {
-    loadLegend() {
-      this.legend = legend;
-    },
     closeProfile() {
-      this.$emit("closeProfile", false);
+      this.$emit("closeProfile");
     },
 
     makeChart() {
-      const chartData = {
-        labels: this.legend.map((legendItem) => legendItem.text),
+      this.chartData = {
+        labels: this.copyLegend.map((legendItem) => legendItem.text),
         datasets: [
           {
             label: "Легенда",
-            backgroundColor: this.legend.map((legendItem) => legendItem.color),
-            data: this.legend.map((legendItem) => legendItem.counter),
+            backgroundColor: this.copyLegend.map(
+              (legendItem) => legendItem.color
+            ),
+            data: this.copyLegend.map((legendItem) => legendItem.counter),
           },
         ],
       };
-      const options = {
+      this.options = {
         legend: {
           display: false,
         },
       };
 
-      this.$refs.chart.renderChart(chartData, options);
+      this.$refs.chart.renderChart(this.chartData, this.options);
     },
   },
 };

@@ -6,6 +6,8 @@
         :person="person"
         :isUserOpenned="isUserOpenned"
         @closeProfile="onCloseProfile"
+        :legend="legend"
+        v-click-outside="hide"
       />
     </div>
   </div>
@@ -17,12 +19,17 @@ import SideMenu from "./components/SideMenu.vue";
 import tables from "@/assets/data/tables.json";
 import legend from "@/assets/data/legend.json";
 import people from "@/assets/data/people.json";
+import ClickOutside from "vue-click-outside";
 
 export default {
   name: "App",
   components: {
     Map,
     SideMenu,
+  },
+
+  directives: {
+    ClickOutside,
   },
 
   data: () => ({
@@ -41,17 +48,18 @@ export default {
 
   methods: {
     getCounter(tables, legend) {
-      let res = [];
-
-      legend.map((legendItem) => {
+      let res = legend.map((legendItem) => {
+        let counter = 0;
         tables.forEach((table) => {
           if (table.group_id === legendItem.group_id) {
-            legendItem.counter += 1;
+            counter++;
           }
         });
-        res.push(legendItem);
+        return {
+          ...legendItem,
+          counter,
+        };
       });
-
       return res;
     },
 
@@ -61,6 +69,10 @@ export default {
     },
 
     onCloseProfile() {
+      this.isUserOpenned = false;
+    },
+
+    hide() {
       this.isUserOpenned = false;
     },
   },
